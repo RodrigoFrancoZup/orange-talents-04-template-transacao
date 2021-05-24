@@ -32,4 +32,15 @@ public class TransacaoController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/atuais/cartao/{idCartao}")
+    public ResponseEntity<?> listarRecentes(@PathVariable String idCartao) {
+        Optional<Cartao> possivelCartao = cartaoRepository.findById(idCartao);
+        if (possivelCartao.isPresent()) {
+            List<Transacao> transacoes = transacaoRepository.findTop10ByCartaoIdOrderByEfetivadaEmDesc(idCartao);
+            List<TransacaoResponse> response = TransacaoResponse.converteParaListaDeTransacaoResponse(transacoes);
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.notFound().build();
+    }
 }

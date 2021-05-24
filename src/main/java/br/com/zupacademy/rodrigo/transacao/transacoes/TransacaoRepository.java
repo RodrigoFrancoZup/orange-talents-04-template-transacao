@@ -9,4 +9,6 @@ import java.util.List;
 public interface TransacaoRepository extends JpaRepository<Transacao, String> {
 
     List<Transacao> findByCartaoId(String cartaoId);
+
+    List<Transacao> findTop10ByCartaoIdOrderByEfetivadaEmDesc(String cartaoId);
 }
