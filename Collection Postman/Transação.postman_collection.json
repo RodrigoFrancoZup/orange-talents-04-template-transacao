@@ -1,0 +1,165 @@
+{
+	"info": {
+		"_postman_id": "e80ea9a3-c677-4120-ba4e-b38d627141b2",
+		"name": "Transação",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Gerando/Deletando Transação",
+			"item": [
+				{
+					"name": "http://localhost:7777/api/cartoes",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id\": \"5541da9c-79c5-44fb-b701-cc50ed07b45d\",\r\n  \"email\": \"rodrigo@email.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:7777/api/cartoes",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"api",
+								"cartoes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:7777/api/cartoes/5541da9c-79c5-44fb-b701-cc50ed07b45d",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7777/api/cartoes/5541da9c-79c5-44fb-b701-cc50ed07b45d",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7777",
+							"path": [
+								"api",
+								"cartoes",
+								"5541da9c-79c5-44fb-b701-cc50ed07b45d"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "http://localhost:18080/auth/realms/realm-transacao/protocol/openid-connect/token",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "text"
+						},
+						{
+							"key": "username",
+							"value": "rodrigo",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "rodrigo123",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "client-transacao",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "blabla",
+							"type": "text"
+						},
+						{
+							"key": "scope",
+							"value": "escopo-transacao",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:18080/auth/realms/realm-transacao/protocol/openid-connect/token",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "18080",
+					"path": [
+						"auth",
+						"realms",
+						"realm-transacao",
+						"protocol",
+						"openid-connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:8080/transacao/cartao/5541da9c-79c5-44fb-b701-cc50ed07b45d",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/transacao/cartao/5541da9c-79c5-44fb-b701-cc50ed07b45d",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"transacao",
+						"cartao",
+						"5541da9c-79c5-44fb-b701-cc50ed07b45d"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:8080/transacao/atuais/cartao/5541da9c-79c5-44fb-b701-cc50ed07b45d",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/transacao/atuais/cartao/1234567899999",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"transacao",
+						"atuais",
+						"cartao",
+						"1234567899999"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

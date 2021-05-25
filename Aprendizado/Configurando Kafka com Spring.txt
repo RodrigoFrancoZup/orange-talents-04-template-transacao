@@ -1,0 +1,118 @@
+1.	Adicionar no projeto (arquivo pom.xml) a dependencia:
+
+	<dependency>
+		<groupId>org.springframework.cloud</groupId>
+		<artifactId>spring-cloud-starter-stream-kafka</artifactId>	
+		<version>3.0.7.RELEASE</version>
+	</dependency>
+
+2.	Configurar o endereço do Kafka, para isso basta por no arquivo application.properties:
+
+	# Endereço do Kafka 
+	spring.kafka.bootstrap-servers=${KAFKA_HOST:localhost:9092}
+
+	Nesse caso estamos usando Spring Expression Language, podemos passar o valor do endereço pela variável de ambiente KAFKA_HOST, caso não passem o valor padrão será localhost:9092
+
+3.	Precisamos agora configurar as propriedades do nosso consumidor (Consumer):
+
+	# Formato da chave (String) recebida! 
+	spring.kafka.consumer.key-deserializer=org.apache.kafka.common.serialization.StringDeserializer 
+
+	# Formato da mensagem \ evento (JSON) recebida(o)! 
+	spring.kafka.consumer.value-deserializer=org.springframework.kafka.support.serializer.JsonDeserializer 
+
+	# Identificador do grupo de consumo 
+	spring.kafka.consumer.group-id=${KAFKA_CONSUMER_GROUP_ID:minha-aplicacao} 
+
+	# Modelo de coleta do consumidor (latest, earliest, none) 
+	spring.kafka.consumer.auto-offset-reset=${KAFKA_AUTO-OFFSET-RESET:latest}
+
+4.	Agora temos que criar uma classe que representará a mensagem, a classe será:
+
+	public class EventoDeTransacao { 
+		private String id; 
+		private BigDecimal valor; 
+
+		//Toda Classe de Mensagem "Casca de Mensagem" precisa do Construtor 	Padrão
+		public EventoTransacao(){
+		}
+	}
+
+	Na primeira prática (Projeto Transacao), eu chamei essa classe de TransacaoMensagem e por isso terei que usar esse mesmo nome nas classes de configuração a seguir, ou seja, onde tiver EventoDeTransacao usar TransacaoMensagem.
+
+	Os atributos dessa classe vai depender do que está vindo na mensagem. Nesse exemplo a mensagem vem com os atributos id e valor. Com a configuração que vamos fazer será possivel colocar esses valores em um objeto.
+
+	Não esqueca do construtor padrão em todas as classes de Mensagem!
+
+5.	Vamos precisar configurar nosso consumidor (Consumer), mas para isso precisaremos criar uma classe de configuração do Kafka:
+
+	@Configuration 
+	public class KafkaConfiguration { 
+
+		private final KafkaProperties kafkaProperties; 
+
+		public KafkaConfiguration(KafkaProperties kafkaProperties) { 
+			this.kafkaProperties = kafkaProperties; } 
+	}
+
+6.	Ainda na classe KafkaConfiguration devemos colocar as propriedades do nosso consumidor, para isso vamos criar um método:
+
+	public Map<String, Object> consumerConfigurations() { 
+
+		Map<String, Object> properties = new HashMap<>(); 
+
+		properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers()); 
+
+		properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, kafkaProperties.getConsumer().getKeyDeserializer()); 
+
+		properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, kafkaProperties.getConsumer().getValueDeserializer()); 
+
+		properties.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaProperties.getConsumer().getGroupId()); 
+
+		properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, kafkaProperties.getConsumer().getAutoOffsetReset()); 
+
+	return properties; 
+
+	}
+
+7.	Agora de fato precisamos criar na classe KafkaConfiguration um método que cria um Consumidor (Consumer) com a configuração que já fizemos:
+
+	@Bean 
+	public ConsumerFactory<String, EventoDeTransacao> transactionConsumerFactory() { 
+
+		StringDeserializer stringDeserializer = new StringDeserializer(); 
+
+		JsonDeserializer<EventoDeTransacao> jsonDeserializer = new JsonDeserializer<>(EventoDeTransacao.class, false); 
+
+		return new DefaultKafkaConsumerFactory<>(consumerConfigurations(), stringDeserializer, jsonDeserializer); 
+
+	}
+
+8.	A configuração do Consumer foi finalizada. Precisamos agora configurar nosso listener, ainda na classe KafkaConfiguration:
+
+	@Bean public ConcurrentKafkaListenerContainerFactory<String, EventoDeTransacao> kafkaListenerContainerFactory() { 
+
+		ConcurrentKafkaListenerContainerFactory<String, EventoDeTransacao> factory = new ConcurrentKafkaListenerContainerFactory<>(); 
+
+		factory.setConsumerFactory(transactionConsumerFactory()); 
+
+		return factory;
+
+ 	}
+
+9.	Agora podemos fazer o Listener, no caso será uma nova Classe:
+
+	@Component 
+	public class ListenerDeTransacao { 
+
+		@KafkaListener(topics = "${spring.kafka.topic.transactions}") 
+		public void ouvir(EventoDeTransacao eventoDeTransacao) { 
+
+		System.out.println(eventoDeTransacao); 
+		}
+ 	}
+
+Recapitulando:
+
+Primeiro a gente teve que transcrever as propriedades do consumidor para um mapa, que foi utilizado para definir nosso consumidor e por último foi cadastrado o nosso consumidor no listener!
+

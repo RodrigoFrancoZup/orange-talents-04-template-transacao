@@ -1,0 +1,3 @@
+⦁	Uma busca por transações mais recentes, e no máximo as 10 últimas -TransacaoRepository:
+
+List<Transacao> findTop10ByCartaoIdOrderByEfetivadaEmDesc(String cartaoId);
